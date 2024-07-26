@@ -8,7 +8,7 @@
   "scripts": {
     "build": "tsc && babel src --out-dir dist --extensions \".ts,.js\"",
     "start": "node dist/app.js",
-    "dev": "nodemon --extensions \".ts,.js\""
+    "dev": "nodemon --exec babel-node src/app.ts --extensions \".ts,.js\""
   },
   "devDependencies": {
     "@babel/cli": "^7.24.8",

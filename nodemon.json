@@ -1,3 +1,0 @@
-{
-  "exec": "babel-node src/app.ts"
-}
