@@ -1,3 +1,4 @@
+import { Socket } from "dgram";
 import express, { Request, Response } from "express";
 import http from "http";
 import path from "path";
@@ -18,19 +19,18 @@ app.get("/*", (req: Request, res: Response) => res.redirect("/"));
 const server = http.createServer(app);
 const wss = new ws.WebSocketServer({ server });
 
-// 아래의 코드를 작성하지 않는다고 브라우저와 연결이 성립하지 않는 건 아님 => 그저 이벤트를 기다리는 것 뿐
+const sockets: WebSocket[] = [];
+
 wss.on("connection", (socket) => {
   console.log("Connected to Browser ✅");
+  sockets.push(socket);
 
-  // 브라우저로부터 메시지를 받았을 때의 이벤트 핸들러
-  socket.on("message", (message) =>
-    console.log(`Browser: ${message.toString()}`)
-  );
+  socket.on("message", (message) => {
+    sockets.forEach((item) => item.send(message.toString()));
+  });
 
-  // 브라우저와의 연결이 종료되었을 때의 이벤트 핸들러
   socket.on("close", () => console.log("Disconnected from Browser ❌"));
 
-  // 브라우저한테 메시지를 보내고 싶다면 'send'
   socket.send("Welcome to ANZOOM");
 });
 
