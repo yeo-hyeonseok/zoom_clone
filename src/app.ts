@@ -1,8 +1,8 @@
-import { Socket } from "dgram";
 import express, { Request, Response } from "express";
 import http from "http";
 import path from "path";
-import ws, { WebSocket } from "ws";
+import ws from "ws";
+import { Message, UserSocket } from "./types";
 
 const app = express();
 
@@ -19,19 +19,28 @@ app.get("/*", (req: Request, res: Response) => res.redirect("/"));
 const server = http.createServer(app);
 const wss = new ws.WebSocketServer({ server });
 
-const sockets: WebSocket[] = [];
+const sockets: UserSocket[] = [];
 
-wss.on("connection", (socket) => {
+wss.on("connection", (socket: UserSocket) => {
   console.log("Connected to Browser ✅");
+  socket.nickname = "anonymous";
   sockets.push(socket);
 
-  socket.on("message", (message) => {
-    sockets.forEach((item) => item.send(message.toString()));
+  socket.on("message", (result) => {
+    const message: Message = JSON.parse(result.toString());
+
+    switch (message.type) {
+      case "nickname":
+        socket.nickname = message.payload;
+        break;
+      case "new_message":
+        sockets.forEach((item: UserSocket) =>
+          item.send(`${socket.nickname}: ${message.payload}`)
+        );
+    }
   });
 
   socket.on("close", () => console.log("Disconnected from Browser ❌"));
-
-  socket.send("Welcome to ANZOOM");
 });
 
 server.listen(3000, () => console.log("3000번 포트 연결 중..."));
