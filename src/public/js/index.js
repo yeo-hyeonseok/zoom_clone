@@ -1,4 +1,7 @@
-const socket = new WebSocket(`ws://${window.location.host}`);
+// io => 자동적으로 서버 측의 socket.io와 연결해주는 함수
+const socket = io();
+
+/*const socket = new WebSocket(`ws://${window.location.host}`);
 
 const messageList = document.querySelector("ul.message_list");
 const nicknameForm = document.querySelector("form.nickname_form");
@@ -13,7 +16,6 @@ function makeMessage(type, payload) {
   return JSON.stringify(message);
 }
 
-/* Socket Event Handler*/
 socket.addEventListener("open", () => console.log("Connected to Server ✅"));
 
 socket.addEventListener("message", (message) => {
@@ -26,7 +28,6 @@ socket.addEventListener("close", () =>
   console.log("Disconnected from Server ❌")
 );
 
-/* Elements Event Handler */
 nicknameForm.addEventListener("submit", (e) => {
   e.preventDefault();
 
@@ -45,4 +46,4 @@ messageForm.addEventListener("submit", (e) => {
   socket.send(makeMessage("new_message", input.value));
   input.value = "";
   input.focus();
-});
+});*/

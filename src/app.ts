@@ -1,7 +1,7 @@
 import express, { Request, Response } from "express";
 import http from "http";
 import path from "path";
-import ws from "ws";
+import { Server, Socket } from "socket.io";
 import { Message, UserSocket } from "./types";
 
 const app = express();
@@ -16,8 +16,14 @@ app.get("/", (req: Request, res: Response) => {
 
 app.get("/*", (req: Request, res: Response) => res.redirect("/"));
 
-const server = http.createServer(app);
-const wss = new ws.WebSocketServer({ server });
+const httpServer = http.createServer(app);
+const wsServer = new Server(httpServer);
+
+wsServer.on("connection", (socket: Socket) => {
+  console.log(socket);
+});
+
+/*const wss = new ws.WebSocketServer({ server });
 
 const sockets: UserSocket[] = [];
 
@@ -41,6 +47,6 @@ wss.on("connection", (socket: UserSocket) => {
   });
 
   socket.on("close", () => console.log("Disconnected from Browser ❌"));
-});
+});*/
 
-server.listen(3000, () => console.log("3000번 포트 연결 중..."));
+httpServer.listen(3000, () => console.log("3000번 포트 연결 중..."));
