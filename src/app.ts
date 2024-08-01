@@ -20,7 +20,10 @@ const httpServer = http.createServer(app);
 const wsServer = new Server(httpServer);
 
 wsServer.on("connection", (socket: Socket) => {
-  console.log(socket);
+  socket.on("enter_room", (msg, done) => {
+    console.log(msg);
+    done("어 나 서번데"); // 서버는 이 함수를 호출만 하고, 실제 실행은 프론트에서 수행됨
+  });
 });
 
 /*const wss = new ws.WebSocketServer({ server });
