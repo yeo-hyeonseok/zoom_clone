@@ -4,3 +4,11 @@ form {
   flex-direction: column;
   align-items: end;
 }
+
+div#room {
+  display: none;
+}
+
+div#room > h2 {
+  text-align: center;
+}

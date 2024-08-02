@@ -2,16 +2,35 @@
 const socket = io();
 
 const welcome = document.querySelector("div#welcome");
-const roomForm = welcome.querySelector("form");
+const welcomeForm = welcome.querySelector("form");
+const room = document.querySelector("div#room");
+const chat = room.querySelector("ul");
 
-roomForm.addEventListener("submit", (e) => {
+function onEnterRoom(roomName) {
+  const h2 = room.querySelector("h2.room_name");
+  h2.innerText = roomName;
+
+  welcome.style.display = "none";
+  room.style.display = "block";
+}
+
+function addMessage(text) {
+  const li = document.createElement("li");
+
+  li.innerText = text;
+  chat.append(li);
+}
+
+socket.on("welcome", () => {
+  addMessage("누군가가 채팅방에 들어왔습니다.");
+});
+
+welcomeForm.addEventListener("submit", (e) => {
   e.preventDefault();
 
-  const input = roomForm.querySelector("input");
+  const input = welcomeForm.querySelector("input");
 
-  socket.emit("enter_room", { payload: input.value }, (msg) => {
-    console.log(`${msg}(서버에서 호출됐지만, 클라이언트에서 실행됨)`);
-  });
+  socket.emit("enter_room", input.value, onEnterRoom);
   input.value = "";
   input.focus();
 });

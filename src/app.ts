@@ -20,36 +20,15 @@ const httpServer = http.createServer(app);
 const wsServer = new Server(httpServer);
 
 wsServer.on("connection", (socket: Socket) => {
-  socket.on("enter_room", (msg, done) => {
-    console.log(msg);
-    done("어 나 서번데"); // 서버는 이 함수를 호출만 하고, 실제 실행은 프론트에서 수행됨
+  // 소켓의 모든 이벤트를 감지
+  socket.onAny((e) => console.log(`소켓 이벤트: ${e}`));
+
+  socket.on("enter_room", (roomName, done) => {
+    socket.join(roomName);
+    done(roomName);
+    // 룸에서 나를 제외한 모든 소켓에 welcome 이벤트 발생시키기
+    socket.to(roomName).emit("welcome");
   });
 });
-
-/*const wss = new ws.WebSocketServer({ server });
-
-const sockets: UserSocket[] = [];
-
-wss.on("connection", (socket: UserSocket) => {
-  console.log("Connected to Browser ✅");
-  socket.nickname = "anonymous";
-  sockets.push(socket);
-
-  socket.on("message", (result) => {
-    const message: Message = JSON.parse(result.toString());
-
-    switch (message.type) {
-      case "nickname":
-        socket.nickname = message.payload;
-        break;
-      case "new_message":
-        sockets.forEach((item: UserSocket) =>
-          item.send(`${socket.nickname}: ${message.payload}`)
-        );
-    }
-  });
-
-  socket.on("close", () => console.log("Disconnected from Browser ❌"));
-});*/
 
 httpServer.listen(3000, () => console.log("3000번 포트 연결 중..."));
