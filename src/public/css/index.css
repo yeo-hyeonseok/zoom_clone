@@ -12,3 +12,8 @@ div#room {
 div#room > h2 {
   text-align: center;
 }
+
+div#room > ul.chat {
+  height: 10rem;
+  overflow-x: scroll;
+}

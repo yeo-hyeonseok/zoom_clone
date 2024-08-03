@@ -29,6 +29,16 @@ wsServer.on("connection", (socket: Socket) => {
     // 룸에서 나를 제외한 모든 소켓에 welcome 이벤트 발생시키기
     socket.to(roomName).emit("welcome");
   });
+
+  socket.on("new_message", (roomName, msg, done) => {
+    socket.to(roomName).emit("new_message", msg);
+    done(`당신: ${msg}`);
+  });
+
+  // 연결이 완전히 끊어지기 전, disconnect하고는 다른 거임
+  socket.on("disconnecting", () => {
+    socket.rooms.forEach((room) => socket.to(room).emit("bye"));
+  });
 });
 
 httpServer.listen(3000, () => console.log("3000번 포트 연결 중..."));
