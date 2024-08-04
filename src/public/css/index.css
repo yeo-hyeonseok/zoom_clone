@@ -5,15 +5,19 @@ form {
   align-items: end;
 }
 
+div#welcome > form.nickname_form {
+  margin-bottom: 2rem;
+}
+
 div#room {
   display: none;
 }
 
-div#room > h2 {
+div#room > h2.room_name {
   text-align: center;
 }
 
-div#room > ul.chat {
+div#room > ul.chat_list {
   height: 10rem;
   overflow-x: scroll;
 }

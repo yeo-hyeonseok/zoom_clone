@@ -1,12 +1,13 @@
-// io => 자동적으로 서버 측의 socket.io와 연결해주는 함수
 const socket = io();
 
 const welcome = document.querySelector("div#welcome");
-const welcomeForm = welcome.querySelector("form");
+const nickname = document.querySelector("p.nickname");
+const nicknameForm = document.querySelector("form.nickname_form");
+const roomForm = document.querySelector("form.room_form");
+const roomName = document.querySelector("h2.room_name");
 const room = document.querySelector("div#room");
-const roomName = room.querySelector("h2.room_name");
-const writeForm = room.querySelector("form");
-const chat = room.querySelector("ul");
+const writeForm = document.querySelector("form.message_form");
+const chat = document.querySelector("ul.chat_list");
 
 function onEnterRoom(name) {
   roomName.innerText = name;
@@ -25,22 +26,37 @@ function addMessage(msg) {
   chat.scrollTo(0, scrollHeight);
 }
 
-socket.on("welcome", () => {
-  addMessage("누군가가 채팅방에 들어왔습니다.");
+/* from server */
+socket.on("welcome", (nickname) => {
+  addMessage(`${nickname}님이 채팅방에 들어왔습니다.`);
 });
 
-socket.on("new_message", (msg) => {
-  addMessage(`상대: ${msg}`);
+socket.on("new_message", (nickname, msg) => {
+  addMessage(`${nickname}: ${msg}`);
 });
 
-socket.on("bye", () => {
-  addMessage("누군가가 채팅방을 나갔습니다.");
+socket.on("bye", (nickname) => {
+  addMessage(`${nickname}님이 채팅방을 나갔습니다.`);
 });
 
-welcomeForm.addEventListener("submit", (e) => {
+/* to server */
+nicknameForm.addEventListener("submit", (e) => {
   e.preventDefault();
 
-  const input = welcomeForm.querySelector("input");
+  const input = nicknameForm.querySelector("input");
+  const inputValue = input.value;
+
+  socket.emit("nickname", inputValue, () => {
+    nickname.innerText = inputValue;
+  });
+  input.value = "";
+  input.focus();
+});
+
+roomForm.addEventListener("submit", (e) => {
+  e.preventDefault();
+
+  const input = roomForm.querySelector("input");
 
   socket.emit("enter_room", input.value, onEnterRoom);
   input.value = "";

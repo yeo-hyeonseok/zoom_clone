@@ -1,10 +1,5 @@
-import { WebSocket } from "ws";
+import { Socket } from "socket.io";
 
-export interface Message {
-  type: string;
-  payload: string;
-}
-
-export interface UserSocket extends WebSocket {
-  nickname: string;
+export interface UserSocket extends Socket {
+  nickname?: string;
 }
