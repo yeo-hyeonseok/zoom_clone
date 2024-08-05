@@ -1,20 +1,13 @@
 const socket = io();
 
+const serviceInfo = document.querySelector("ul#service_info");
 const welcome = document.querySelector("div#welcome");
-const nickname = document.querySelector("p.nickname");
 const nicknameForm = document.querySelector("form.nickname_form");
 const roomForm = document.querySelector("form.room_form");
-const roomName = document.querySelector("h2.room_name");
 const room = document.querySelector("div#room");
-const writeForm = document.querySelector("form.message_form");
+const roomName = document.querySelector("h2.room_name");
 const chat = document.querySelector("ul.chat_list");
-
-function onEnterRoom(name) {
-  roomName.innerText = name;
-
-  welcome.style.display = "none";
-  room.style.display = "block";
-}
+const writeForm = document.querySelector("form.message_form");
 
 function addMessage(msg) {
   const li = document.createElement("li");
@@ -29,6 +22,11 @@ function addMessage(msg) {
 /* from server */
 socket.on("welcome", (nickname) => {
   addMessage(`${nickname}님이 채팅방에 들어왔습니다.`);
+});
+
+socket.on("room_change", (num) => {
+  const roomCount = document.querySelector("span.room_count");
+  roomCount.innerText = num;
 });
 
 socket.on("new_message", (nickname, msg) => {
@@ -47,6 +45,7 @@ nicknameForm.addEventListener("submit", (e) => {
   const inputValue = input.value;
 
   socket.emit("nickname", inputValue, () => {
+    const nickname = document.querySelector("span.username");
     nickname.innerText = inputValue;
   });
   input.value = "";
@@ -58,7 +57,12 @@ roomForm.addEventListener("submit", (e) => {
 
   const input = roomForm.querySelector("input");
 
-  socket.emit("enter_room", input.value, onEnterRoom);
+  socket.emit("enter_room", input.value, (name) => {
+    roomName.innerText = name;
+
+    welcome.style.display = "none";
+    room.style.display = "block";
+  });
   input.value = "";
   input.focus();
 });

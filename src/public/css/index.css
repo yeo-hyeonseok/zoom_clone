@@ -1,3 +1,9 @@
+* {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
 form {
   margin: 0 auto;
   display: flex;
@@ -5,12 +11,17 @@ form {
   align-items: end;
 }
 
+ul#service_info span {
+  margin-left: 4px;
+}
+
 div#welcome > form.nickname_form {
-  margin-bottom: 2rem;
+  margin-bottom: 1rem;
 }
 
 div#room {
   display: none;
+  text-align: center;
 }
 
 div#room > h2.room_name {
@@ -18,6 +29,13 @@ div#room > h2.room_name {
 }
 
 div#room > ul.chat_list {
+  display: inline-block;
   height: 10rem;
-  overflow-x: scroll;
+  width: 75%;
+  overflow-y: scroll;
+  margin: 0.5rem 0;
+}
+
+div#room > ul.chat_list > li {
+  text-align: left;
 }

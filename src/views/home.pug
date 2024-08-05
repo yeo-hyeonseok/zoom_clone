@@ -9,7 +9,11 @@ html(lang="en")
     body 
         header 
             h1 ANZOOM
-            p.nickname
+            ul#service_info 
+                li 개설된 방의 수:
+                    span.room_count 0
+                li 당신의 이름:
+                    span.username 익명
         main             
             div#welcome
                 form.nickname_form
