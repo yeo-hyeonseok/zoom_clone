@@ -28,6 +28,10 @@ div#room > h2.room_name {
   text-align: center;
 }
 
+div#room > p > span.room_user_count {
+  margin-left: 4px;
+}
+
 div#room > ul.chat_list {
   display: inline-block;
   height: 10rem;
@@ -38,4 +42,15 @@ div#room > ul.chat_list {
 
 div#room > ul.chat_list > li {
   text-align: left;
+}
+
+div#room > form.message_form > div {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+}
+
+div#room > form.message_form > div > button.exit_button {
+  background-color: orangered;
+  border-color: orangered;
 }

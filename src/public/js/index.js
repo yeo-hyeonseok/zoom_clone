@@ -8,6 +8,7 @@ const room = document.querySelector("div#room");
 const roomName = document.querySelector("h2.room_name");
 const chat = document.querySelector("ul.chat_list");
 const writeForm = document.querySelector("form.message_form");
+const exitButton = document.querySelector("button.exit_button");
 
 function addMessage(msg) {
   const li = document.createElement("li");
@@ -19,14 +20,31 @@ function addMessage(msg) {
   chat.scrollTo(0, scrollHeight);
 }
 
-/* from server */
+function clearChatList() {
+  chat.innerHTML = "";
+}
+
+/* From Server */
 socket.on("welcome", (nickname) => {
   addMessage(`${nickname}님이 채팅방에 들어왔습니다.`);
 });
 
+socket.on("user_change", (num) => {
+  const userCount = document.querySelector("span.user_count");
+
+  userCount.innerText = num;
+});
+
 socket.on("room_change", (num) => {
   const roomCount = document.querySelector("span.room_count");
+
   roomCount.innerText = num;
+});
+
+socket.on("room_user_change", (num) => {
+  const roomUserCount = document.querySelector("span.room_user_count");
+
+  roomUserCount.innerText = num;
 });
 
 socket.on("new_message", (nickname, msg) => {
@@ -37,7 +55,7 @@ socket.on("bye", (nickname) => {
   addMessage(`${nickname}님이 채팅방을 나갔습니다.`);
 });
 
-/* to server */
+/* To Server */
 nicknameForm.addEventListener("submit", (e) => {
   e.preventDefault();
 
@@ -48,6 +66,7 @@ nicknameForm.addEventListener("submit", (e) => {
     const nickname = document.querySelector("span.username");
     nickname.innerText = inputValue;
   });
+
   input.value = "";
   input.focus();
 });
@@ -59,10 +78,10 @@ roomForm.addEventListener("submit", (e) => {
 
   socket.emit("enter_room", input.value, (name) => {
     roomName.innerText = name;
-
     welcome.style.display = "none";
     room.style.display = "block";
   });
+
   input.value = "";
   input.focus();
 });
@@ -73,6 +92,18 @@ writeForm.addEventListener("submit", (e) => {
   const input = writeForm.querySelector("input");
 
   socket.emit("new_message", roomName.innerText, input.value, addMessage);
+
   input.value = "";
   input.focus();
+});
+
+exitButton.addEventListener("click", (e) => {
+  e.preventDefault();
+
+  socket.emit("exit_room", roomName.innerText, () => {
+    roomName.innerText = "";
+    welcome.style.display = "block";
+    room.style.display = "none";
+    clearChatList();
+  });
 });
