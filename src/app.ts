@@ -2,6 +2,7 @@ import express, { Response } from "express";
 import http from "http";
 import path from "path";
 import { Server } from "socket.io";
+import { instrument } from "@socket.io/admin-ui";
 import { UserSocket } from "./types";
 
 const app = express();
@@ -18,7 +19,16 @@ app.get("/*", (_, res: Response) => res.redirect("/"));
 
 /* Socket.IO */
 const httpServer = http.createServer(app);
-const wsServer = new Server(httpServer);
+const wsServer = new Server(httpServer, {
+  cors: {
+    origin: ["https://admin.socket.io"],
+    credentials: true,
+  },
+});
+
+instrument(wsServer, {
+  auth: false,
+});
 
 function getUserCount() {
   return wsServer.sockets.adapter.sids.size;
