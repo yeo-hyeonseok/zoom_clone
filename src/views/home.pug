@@ -8,31 +8,20 @@ html(lang="en")
         link(rel="stylesheet", href="css/index.css")       
     body 
         header 
-            h1 ANZOOM
-            ul#service_info 
-                li 접속 인원:
-                    span.user_count 0
-                li 개설된 방의 수:
-                    span.room_count 0
-                li 당신의 이름:
-                    span.username 익명
-        main             
-            div#welcome
-                form.nickname_form
-                    input(type="text", placeholder="닉네임을 입력해주세요.(선택사항)")
-                    button(type="submit") 저장
-                form.room_form
-                    input(type="text", placeholder="방 이름을 입력해주세요.", required)
-                    button(type="submit") 들어가기
-            div#room                
-                h2.room_name
-                p 참가 인원:
-                    span.room_user_count 0
-                ul.chat_list
-                form.message_form
-                    input(type="text", placeholder="메시지를 입력해주세요.", required)
-                    div
-                        button(type="button").exit_button 나가기
-                        button(type="submit") 전송    
+            h1 ANZOOM          
+        main                         
+            div#other_stream
+                h2 상대방
+                video#other_cam(autoplay, playsinline, width="600", height="400") 
+                div#other_control
+                    button.mute 마이크 on
+                    button.camera 카메라 on
+            div#my_stream                
+                h2 나
+                // playsinline => 모바일 환경에서 필요한 속성(자동 전체화면 방지) 
+                video#my_cam(autoplay, playsinline, width="600", height="400") 
+                div#my_control
+                    button.mute 마이크 on
+                    button.camera 카메라 on
         script(src="/socket.io/socket.io.js")
         script(src="js/index.js")

@@ -1,109 +1,45 @@
 const socket = io();
 
-const serviceInfo = document.querySelector("ul#service_info");
-const welcome = document.querySelector("div#welcome");
-const nicknameForm = document.querySelector("form.nickname_form");
-const roomForm = document.querySelector("form.room_form");
-const room = document.querySelector("div#room");
-const roomName = document.querySelector("h2.room_name");
-const chat = document.querySelector("ul.chat_list");
-const writeForm = document.querySelector("form.message_form");
-const exitButton = document.querySelector("button.exit_button");
+const myCam = document.querySelector("video#my_cam");
+const myControl = document.querySelector("div#my_control");
+const myMuteButton = myControl.querySelector("button.mute");
+const myCameraButton = myControl.querySelector("button.camera");
 
-function addMessage(msg) {
-  const li = document.createElement("li");
+let myStream;
+let isMuted = false;
+let isCameraOff = false;
 
-  li.innerText = msg;
-  chat.append(li);
+async function getMedia() {
+  try {
+    myStream = await navigator.mediaDevices.getUserMedia({
+      video: true,
+      audio: true,
+    });
 
-  const scrollHeight = chat.scrollHeight;
-  chat.scrollTo(0, scrollHeight);
+    myCam.srcObject = myStream;
+  } catch (error) {
+    console.log(error);
+  }
 }
 
-function clearChatList() {
-  chat.innerHTML = "";
-}
-
-/* From Server */
-socket.on("welcome", (nickname) => {
-  addMessage(`${nickname}님이 채팅방에 들어왔습니다.`);
+myMuteButton.addEventListener("click", () => {
+  if (isMuted) {
+    isMuted = false;
+    myMuteButton.innerText = "마이크 on";
+  } else {
+    isMuted = true;
+    myMuteButton.innerText = "마이크 off";
+  }
 });
 
-socket.on("user_change", (num) => {
-  const userCount = document.querySelector("span.user_count");
-
-  userCount.innerText = num;
+myCameraButton.addEventListener("click", () => {
+  if (isCameraOff) {
+    isCameraOff = false;
+    myCameraButton.innerText = "카메라 on";
+  } else {
+    isCameraOff = true;
+    myCameraButton.innerText = "카메라 off";
+  }
 });
 
-socket.on("room_change", (num) => {
-  const roomCount = document.querySelector("span.room_count");
-
-  roomCount.innerText = num;
-});
-
-socket.on("room_user_change", (num) => {
-  const roomUserCount = document.querySelector("span.room_user_count");
-
-  roomUserCount.innerText = num;
-});
-
-socket.on("new_message", (nickname, msg) => {
-  addMessage(`${nickname}: ${msg}`);
-});
-
-socket.on("bye", (nickname) => {
-  addMessage(`${nickname}님이 채팅방을 나갔습니다.`);
-});
-
-/* To Server */
-nicknameForm.addEventListener("submit", (e) => {
-  e.preventDefault();
-
-  const input = nicknameForm.querySelector("input");
-  const inputValue = input.value;
-
-  socket.emit("nickname", inputValue, () => {
-    const nickname = document.querySelector("span.username");
-    nickname.innerText = inputValue;
-  });
-
-  input.value = "";
-  input.focus();
-});
-
-roomForm.addEventListener("submit", (e) => {
-  e.preventDefault();
-
-  const input = roomForm.querySelector("input");
-
-  socket.emit("enter_room", input.value, (name) => {
-    roomName.innerText = name;
-    welcome.style.display = "none";
-    room.style.display = "block";
-  });
-
-  input.value = "";
-  input.focus();
-});
-
-writeForm.addEventListener("submit", (e) => {
-  e.preventDefault();
-
-  const input = writeForm.querySelector("input");
-
-  socket.emit("new_message", roomName.innerText, input.value, addMessage);
-
-  input.value = "";
-  input.focus();
-});
-
-exitButton.addEventListener("click", (e) => {
-  e.preventDefault();
-
-  socket.emit("exit_room", roomName.innerText, () => {
-    roomName.innerText = "";
-    welcome.style.display = "block";
-    room.style.display = "none";
-    clearChatList();
-  });
-});
+getMedia();
