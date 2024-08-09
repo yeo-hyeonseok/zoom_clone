@@ -14,6 +14,11 @@ h2 {
   margin-bottom: 0.5rem;
 }
 
+select#camera_select {
+  margin: 0 auto;
+  margin-bottom: 0.5rem;
+}
+
 div#my_control,
 div#other_control {
   display: flex;
