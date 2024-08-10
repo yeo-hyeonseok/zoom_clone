@@ -1,6 +1,6 @@
 const socket = io();
 
-const cametaSelect = document.querySelector("select#camera_select");
+const cameraSelect = document.querySelector("select#camera_select");
 const myCam = document.querySelector("video#my_cam");
 const myControl = document.querySelector("div#my_control");
 const myMuteButton = myControl.querySelector("button.mute");
@@ -15,32 +15,53 @@ async function getCameras() {
     // 유저에게 연결된 모든 디바이스들의 정보를 불러오는 거임
     const devices = await navigator.mediaDevices.enumerateDevices();
     const cameras = devices.filter((item) => item.kind === "videoinput");
+    // 현재 어떤 카메라가 선택되었는지 확인할 수 있음
+    const currentCamera = myStream.getAudioTracks()[0];
 
     cameras.forEach((item) => {
       const option = document.createElement("option");
 
       option.value = item.deviceId;
       option.innerText = item.label;
-      cametaSelect.append(option);
+      if (currentCamera.label === item.label) option.selected = true;
+
+      cameraSelect.append(option);
     });
   } catch (error) {
     console.log(error);
   }
 }
 
-async function getMedia() {
+async function getMedia(deviceId) {
   try {
-    myStream = await navigator.mediaDevices.getUserMedia({
-      video: true,
+    const initialConstraint = {
+      video: { facingMode: "user" },
       audio: true,
-    });
+    };
+
+    // 해당 id의 카메라 디바이스만을 사용하도록 설정
+    const cameraConstraint = {
+      video: { facingMode: "user", deviceId: { exact: deviceId } },
+      audio: true,
+    };
+
+    myStream = await navigator.mediaDevices.getUserMedia(
+      deviceId ? cameraConstraint : initialConstraint
+    );
 
     myCam.srcObject = myStream;
-    getCameras();
+
+    if (!deviceId) await getCameras();
   } catch (error) {
     console.log(error);
   }
 }
+
+getMedia();
+
+cameraSelect.addEventListener("input", async () => {
+  await getMedia(cameraSelect.value);
+});
 
 myMuteButton.addEventListener("click", () => {
   myStream.getAudioTracks().forEach((item) => (item.enabled = !item.enabled));
@@ -65,5 +86,3 @@ myCameraButton.addEventListener("click", () => {
     myCameraButton.innerText = "카메라 off";
   }
 });
-
-getMedia();
