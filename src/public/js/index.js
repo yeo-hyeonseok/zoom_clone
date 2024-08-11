@@ -1,5 +1,8 @@
 const socket = io();
 
+const welcome = document.querySelector("div#welcome");
+const welcomeForm = welcome.querySelector("form");
+const call = document.querySelector("div#call");
 const cameraSelect = document.querySelector("select#camera_select");
 const myCam = document.querySelector("video#my_cam");
 const myControl = document.querySelector("div#my_control");
@@ -57,7 +60,22 @@ async function getMedia(deviceId) {
   }
 }
 
-getMedia();
+socket.on("welcome", () => {
+  console.log("ㅎㅇ 누가 방에 참여함");
+});
+
+welcomeForm.addEventListener("submit", (e) => {
+  e.preventDefault();
+
+  const input = welcomeForm.querySelector("input");
+
+  socket.emit("enter_room", input.value, () => {
+    getMedia();
+
+    welcome.style.display = "none";
+    call.style.display = "flex";
+  });
+});
 
 cameraSelect.addEventListener("input", async () => {
   await getMedia(cameraSelect.value);

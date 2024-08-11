@@ -1,7 +1,7 @@
 import express, { Response } from "express";
 import http from "http";
 import path from "path";
-import { Server } from "socket.io";
+import { Server, Socket } from "socket.io";
 
 const app = express();
 
@@ -22,6 +22,15 @@ const wsServer = new Server(httpServer, {
     origin: ["https://admin.socket.io"],
     credentials: true,
   },
+});
+
+wsServer.on("connection", (socket: Socket) => {
+  socket.on("enter_room", (roomName: string, done: () => void) => {
+    socket.join(roomName);
+    done();
+
+    socket.to(roomName).emit("welcome");
+  });
 });
 
 httpServer.listen(3000, () => console.log("3000번 포트 연결 중..."));
