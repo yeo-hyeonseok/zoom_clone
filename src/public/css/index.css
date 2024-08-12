@@ -11,6 +11,10 @@ div#welcome > form {
   align-items: end;
 }
 
+h2.roomName {
+  color: cornflowerblue;
+}
+
 div#call {
   /* display: flex; */
   display: none;

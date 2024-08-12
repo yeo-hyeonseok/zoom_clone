@@ -25,11 +25,20 @@ const wsServer = new Server(httpServer, {
 });
 
 wsServer.on("connection", (socket: Socket) => {
-  socket.on("enter_room", (roomName: string, done: () => void) => {
+  socket.onAny((e) => console.log(`소켓 이벤트: ${e}`));
+
+  socket.on("enter_room", (roomName: string) => {
     socket.join(roomName);
-    done();
 
     socket.to(roomName).emit("welcome");
+  });
+
+  socket.on("offer", (offer: RTCSessionDescriptionInit, roomName: string) => {
+    socket.to(roomName).emit("offer", offer);
+  });
+
+  socket.on("answer", (answer: RTCSessionDescriptionInit, roomName: string) => {
+    socket.to(roomName).emit("answer", answer);
   });
 });
 

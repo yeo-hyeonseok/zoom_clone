@@ -2,6 +2,7 @@ const socket = io();
 
 const welcome = document.querySelector("div#welcome");
 const welcomeForm = welcome.querySelector("form");
+const roomName = document.querySelector("h2.roomName");
 const call = document.querySelector("div#call");
 const cameraSelect = document.querySelector("select#camera_select");
 const myCam = document.querySelector("video#my_cam");
@@ -10,15 +11,14 @@ const myMuteButton = myControl.querySelector("button.mute");
 const myCameraButton = myControl.querySelector("button.camera");
 
 let myStream;
+let myPeerConnection; // 브라우저 간의 직접적인 연결
 let isMuted = false;
 let isCameraOff = false;
 
 async function getCameras() {
   try {
-    // 유저에게 연결된 모든 디바이스들의 정보를 불러오는 거임
     const devices = await navigator.mediaDevices.enumerateDevices();
     const cameras = devices.filter((item) => item.kind === "videoinput");
-    // 현재 어떤 카메라가 선택되었는지 확인할 수 있음
     const currentCamera = myStream.getAudioTracks()[0];
 
     cameras.forEach((item) => {
@@ -60,21 +60,52 @@ async function getMedia(deviceId) {
   }
 }
 
-socket.on("welcome", () => {
-  console.log("ㅎㅇ 누가 방에 참여함");
+function makeConnection() {
+  myPeerConnection = new RTCPeerConnection();
+  myStream
+    .getTracks()
+    .forEach((item) => myPeerConnection.addTrack(item, myStream));
+}
+
+async function initCall() {
+  welcome.style.display = "none";
+  call.style.display = "flex";
+
+  await getMedia();
+  makeConnection();
+}
+
+/* Socket handler */
+socket.on("welcome", async () => {
+  // offer => 다른 브라우저가 나의 room에 참가할 수 있도록 해주는 일종의 초대장
+  const offer = await myPeerConnection.createOffer();
+
+  myPeerConnection.setLocalDescription(offer);
+  socket.emit("offer", offer, roomName.innerText);
 });
 
-welcomeForm.addEventListener("submit", (e) => {
+socket.on("offer", async (offer) => {
+  myPeerConnection.setRemoteDescription(offer);
+
+  const answer = await myPeerConnection.createAnswer();
+  myPeerConnection.setLocalDescription(answer);
+
+  socket.emit("answer", answer, roomName.innerText);
+});
+
+socket.on("answer", (answer) => {
+  myPeerConnection.setRemoteDescription(answer);
+});
+
+/* DOM handler */
+welcomeForm.addEventListener("submit", async (e) => {
   e.preventDefault();
 
   const input = welcomeForm.querySelector("input");
 
-  socket.emit("enter_room", input.value, () => {
-    getMedia();
-
-    welcome.style.display = "none";
-    call.style.display = "flex";
-  });
+  await initCall();
+  roomName.innerText = input.value;
+  socket.emit("enter_room", input.value);
 });
 
 cameraSelect.addEventListener("input", async () => {
