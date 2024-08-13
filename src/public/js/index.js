@@ -5,15 +5,20 @@ const welcomeForm = welcome.querySelector("form");
 const roomName = document.querySelector("h2.roomName");
 const call = document.querySelector("div#call");
 const cameraSelect = document.querySelector("select#camera_select");
+
 const myCam = document.querySelector("video#my_cam");
 const myControl = document.querySelector("div#my_control");
 const myMuteButton = myControl.querySelector("button.mute");
 const myCameraButton = myControl.querySelector("button.camera");
 
+const otherCam = document.querySelector("video#other_cam");
+
 let myStream;
 let myPeerConnection; // 브라우저 간의 직접적인 연결
 let isMuted = false;
 let isCameraOff = false;
+
+let otherStream;
 
 async function getCameras() {
   try {
@@ -62,6 +67,16 @@ async function getMedia(deviceId) {
 
 function makeConnection() {
   myPeerConnection = new RTCPeerConnection();
+
+  myPeerConnection.addEventListener("icecandidate", (data) => {
+    socket.emit("ice", data.candidate, roomName.innerText);
+  });
+
+  myPeerConnection.addEventListener("addstream", (data) => {
+    console.log(data.stream);
+    otherCam.srcObject = data.stream;
+  });
+
   myStream
     .getTracks()
     .forEach((item) => myPeerConnection.addTrack(item, myStream));
@@ -95,6 +110,10 @@ socket.on("offer", async (offer) => {
 
 socket.on("answer", (answer) => {
   myPeerConnection.setRemoteDescription(answer);
+});
+
+socket.on("ice", (ice) => {
+  myPeerConnection.addIceCandidate(ice);
 });
 
 /* DOM handler */

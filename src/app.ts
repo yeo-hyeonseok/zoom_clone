@@ -40,6 +40,10 @@ wsServer.on("connection", (socket: Socket) => {
   socket.on("answer", (answer: RTCSessionDescriptionInit, roomName: string) => {
     socket.to(roomName).emit("answer", answer);
   });
+
+  socket.on("ice", (ice, roomName) => {
+    socket.to(roomName).emit("ice", ice);
+  });
 });
 
 httpServer.listen(3000, () => console.log("3000번 포트 연결 중..."));
