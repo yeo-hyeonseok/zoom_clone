@@ -14,7 +14,7 @@ const myCameraButton = myControl.querySelector("button.camera");
 const otherCam = document.querySelector("video#other_cam");
 
 let myStream;
-let myPeerConnection; // 브라우저 간의 직접적인 연결
+let myPeerConnection;
 let isMuted = false;
 let isCameraOff = false;
 
@@ -73,7 +73,6 @@ function makeConnection() {
   });
 
   myPeerConnection.addEventListener("addstream", (data) => {
-    console.log(data.stream);
     otherCam.srcObject = data.stream;
   });
 
@@ -129,6 +128,15 @@ welcomeForm.addEventListener("submit", async (e) => {
 
 cameraSelect.addEventListener("input", async () => {
   await getMedia(cameraSelect.value);
+
+  if (myPeerConnection) {
+    const videoSender = myPeerConnection
+      .getSenders()
+      .filter((item) => item.track.kind === "video");
+    const videoTrack = myStream.getVideoTracks()[0]; // 현재 선택 중인 카메라의 트랙 정보
+
+    videoSender.replaceTrack(videoTrack);
+  }
 });
 
 myMuteButton.addEventListener("click", () => {
