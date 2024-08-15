@@ -12,6 +12,9 @@ const myMuteButton = myControl.querySelector("button.mute");
 const myCameraButton = myControl.querySelector("button.camera");
 
 const otherCam = document.querySelector("video#other_cam");
+const otherControl = document.querySelector("div#other_control");
+const otherMuteButton = otherControl.querySelector("button.mute");
+const otherCameraButton = otherControl.querySelector("button.camera");
 
 let myStream;
 let myPeerConnection;
@@ -19,6 +22,8 @@ let isMuted = false;
 let isCameraOff = false;
 
 let otherStream;
+let otherIsMuted = false;
+let otherIsCameraOff = false;
 
 async function getCameras() {
   try {
@@ -73,6 +78,7 @@ function makeConnection() {
   });
 
   myPeerConnection.addEventListener("addstream", (data) => {
+    otherStream = data.stream;
     otherCam.srcObject = data.stream;
   });
 
@@ -160,5 +166,33 @@ myCameraButton.addEventListener("click", () => {
   } else {
     isCameraOff = true;
     myCameraButton.innerText = "카메라 off";
+  }
+});
+
+otherMuteButton.addEventListener("click", () => {
+  otherStream
+    .getAudioTracks()
+    .forEach((item) => (item.enabled = !item.enabled));
+
+  if (otherIsMuted) {
+    otherIsMuted = false;
+    otherMuteButton.innerText = "마이크 on";
+  } else {
+    otherIsMuted = true;
+    otherMuteButton.innerText = "마이크 off";
+  }
+});
+
+otherCameraButton.addEventListener("click", () => {
+  otherStream
+    .getVideoTracks()
+    .forEach((item) => (item.enabled = !item.enabled));
+
+  if (otherIsCameraOff) {
+    otherIsCameraOff = false;
+    otherCameraButton.innerText = "카메라 on";
+  } else {
+    otherIsCameraOff = true;
+    otherCameraButton.innerText = "카메라 off";
   }
 });
