@@ -31,6 +31,12 @@ select#camera_select {
   margin-bottom: 0.5rem;
 }
 
+video {
+  display: block;
+  object-fit: cover;
+  background-color: gray;
+}
+
 div#my_control,
 div#other_control {
   display: flex;

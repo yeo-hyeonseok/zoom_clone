@@ -25,6 +25,8 @@ let otherStream;
 let otherIsMuted = false;
 let otherIsCameraOff = false;
 
+let myDataChannel;
+
 async function getCameras() {
   try {
     const devices = await navigator.mediaDevices.enumerateDevices();
@@ -97,7 +99,13 @@ async function initCall() {
 
 /* Socket handler */
 socket.on("welcome", async () => {
-  // offer => 다른 브라우저가 나의 room에 참가할 수 있도록 해주는 일종의 초대장
+  // offer를 만드는 peer가 data channel을 만드는 주체임(peerA가 data channel을 만드는 곳)
+  // 메시지 보내는 방법 => myDataChannel.send("hello")
+  myDataChannel = myPeerConnection.createDataChannel("chat");
+  myDataChannel.addEventListener("message", (e) =>
+    console.log("peerB: ", e.data)
+  );
+
   const offer = await myPeerConnection.createOffer();
 
   myPeerConnection.setLocalDescription(offer);
@@ -105,6 +113,15 @@ socket.on("welcome", async () => {
 });
 
 socket.on("offer", async (offer) => {
+  // peer 연결에서 새로운 data channel이 생기면 새로운 data channel로 업데이트(peerB가 data channel을 만드는 곳)
+  myPeerConnection.addEventListener("datachannel", (e) => {
+    myDataChannel = e.channel;
+
+    myDataChannel.addEventListener("message", (e) =>
+      console.log("peerA: ", e.data)
+    );
+  });
+
   myPeerConnection.setRemoteDescription(offer);
 
   const answer = await myPeerConnection.createAnswer();

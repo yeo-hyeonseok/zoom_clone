@@ -20,7 +20,7 @@ html(lang="en")
                     h2 상대방
                     // '나' 화면 영역과 높이 맞추기 용도
                     select(style="visibility: hidden; margin-bottom:0.5rem") 
-                    video#other_cam(autoplay, playsinline, width="600", height="400") 
+                    video#other_cam(autoplay, playsinline, width="500", height="400") 
                     div#other_control
                         button.mute 마이크 on
                         button.camera 카메라 on
@@ -28,7 +28,7 @@ html(lang="en")
                     h2 나
                     select#camera_select 
                     // playsinline => 모바일 환경에서 필요한 속성(자동 전체화면 방지) 
-                    video#my_cam(autoplay, playsinline, width="600", height="400") 
+                    video#my_cam(autoplay, playsinline, width="500", height="400") 
                     div#my_control
                         button.mute 마이크 on
                         button.camera 카메라 on
