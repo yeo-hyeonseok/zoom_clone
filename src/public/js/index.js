@@ -4,6 +4,7 @@ const welcome = document.querySelector("div#welcome");
 const welcomeForm = welcome.querySelector("form");
 const roomName = document.querySelector("h2.roomName");
 const call = document.querySelector("div#call");
+const exitButton = document.querySelector("button.exit_button");
 const cameraSelect = document.querySelector("select#camera_select");
 
 const myCam = document.querySelector("video#my_cam");
@@ -84,6 +85,26 @@ function makeConnection() {
     otherCam.srcObject = data.stream;
   });
 
+  myPeerConnection.addEventListener("connectionstatechange", (e) => {
+    switch (myPeerConnection.connectionState) {
+      case "disconnected":
+        console.log("disconnected");
+      case "failed":
+        console.log("failed");
+        break;
+      case "connected":
+        console.log("connected");
+        break;
+      case "closed":
+        // 연결이 완전히 종료되었을 때
+        console.log("closed");
+        break;
+      default:
+        console.log("etc:", myPeerConnection.connectionState);
+        break;
+    }
+  });
+
   myStream
     .getTracks()
     .forEach((item) => myPeerConnection.addTrack(item, myStream));
@@ -91,7 +112,7 @@ function makeConnection() {
 
 async function initCall() {
   welcome.style.display = "none";
-  call.style.display = "flex";
+  call.style.display = "block";
 
   await getMedia();
   makeConnection();
@@ -99,6 +120,8 @@ async function initCall() {
 
 /* Socket handler */
 socket.on("welcome", async () => {
+  if (myPeerConnection.connectionState === "closed") makeConnection();
+
   // offer를 만드는 peer가 data channel을 만드는 주체임(peerA가 data channel을 만드는 곳)
   // 메시지 보내는 방법 => myDataChannel.send("hello")
   myDataChannel = myPeerConnection.createDataChannel("chat");
@@ -138,6 +161,10 @@ socket.on("ice", (ice) => {
   myPeerConnection.addIceCandidate(ice);
 });
 
+socket.on("exit", () => {
+  myPeerConnection.close();
+});
+
 /* DOM handler */
 welcomeForm.addEventListener("submit", async (e) => {
   e.preventDefault();
@@ -147,6 +174,18 @@ welcomeForm.addEventListener("submit", async (e) => {
   await initCall();
   roomName.innerText = input.value;
   socket.emit("enter_room", input.value);
+  input.value = "";
+});
+
+exitButton.addEventListener("click", () => {
+  myStream.getTracks().forEach((track) => track.stop());
+  myPeerConnection.close();
+
+  socket.emit("exit", roomName.innerText, () => {
+    roomName.innerText = "";
+    welcome.style.display = "block";
+    call.style.display = "none";
+  });
 });
 
 cameraSelect.addEventListener("input", async () => {
@@ -156,7 +195,7 @@ cameraSelect.addEventListener("input", async () => {
     const videoSender = myPeerConnection
       .getSenders()
       .filter((item) => item.track.kind === "video");
-    const videoTrack = myStream.getVideoTracks()[0]; // 현재 선택 중인 카메라의 트랙 정보
+    const videoTrack = myStream.getVideoTracks()[0];
 
     videoSender.replaceTrack(videoTrack);
   }

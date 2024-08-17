@@ -41,8 +41,13 @@ wsServer.on("connection", (socket: Socket) => {
     socket.to(roomName).emit("answer", answer);
   });
 
-  socket.on("ice", (ice, roomName) => {
+  socket.on("ice", (ice, roomName: string) => {
     socket.to(roomName).emit("ice", ice);
+  });
+
+  socket.on("exit", (roomName: string, done: () => void) => {
+    socket.to(roomName).emit("exit");
+    done();
   });
 });
 

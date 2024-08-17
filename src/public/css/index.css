@@ -16,8 +16,20 @@ h2.roomName {
 }
 
 div#call {
-  /* display: flex; */
   display: none;
+}
+
+div#call > p {
+  text-align: center;
+}
+
+button.exit_button {
+  background-color: orangered;
+  border-color: orangered;
+}
+
+div#call > div {
+  display: flex;
   justify-content: center;
 }
 
@@ -34,7 +46,7 @@ select#camera_select {
 video {
   display: block;
   object-fit: cover;
-  background-color: gray;
+  background-color: black;
 }
 
 div#my_control,
